@@ -536,3 +536,327 @@ int main() {
     } while (c == 1);
 }
 ```
+## banker's
+```
+#include <stdio.h>
+
+int main() {
+    int processes, resources;
+    printf("Enter the number of processes: ");
+    scanf("%d", &processes);
+    printf("Enter the number of resources: ");
+    scanf("%d", &resources);
+
+    int max[processes][resources], allocation[processes][resources], need[processes][resources];
+    int available[resources], finish[processes], safeSequence[processes];
+    int safeCount = 0;
+
+    // Input maximum and current resource allocation for each process
+    for (int i = 0; i < processes; i++) {
+        printf("Process %d: ", i + 1);
+        for (int j = 0; j < resources; scanf("%d", &max[i][j++]));
+        for (int j = 0; j < resources; scanf("%d", &allocation[i][j++]), need[i][j] = max[i][j] - allocation[i][j]);
+    }
+
+    // Input available resources
+    printf("Enter the available resources:\n");
+    for (int i = 0; i < resources; scanf("%d", &available[i++]));
+
+    for (int i = 0; i < processes; finish[i++] = 0);
+
+    while (safeCount < processes) {
+        int found = 0;
+        for (int i = 0; i < processes; i++) {
+            if (!finish[i]) {
+                int j;
+                for (j = 0; j < resources && need[i][j] <= available[j]; j++);
+
+                if (j == resources) {
+                    for (int k = 0; k < resources; available[k++] += allocation[i][k]);
+                    safeSequence[safeCount++] = i;
+                    finish[i] = 1;
+                    found = 1;
+                }
+            }
+        }
+
+        if (!found) {
+            printf("The system is in an unsafe state.\n");
+            break;
+        }
+    }
+
+    if (safeCount == processes) {
+        printf("Safe Sequence: ");
+        for (int i = 0; i < processes; printf("%d%s", safeSequence[i++] + 1, i == processes - 1 ? "\n" : " -> "));
+    }
+
+    return 0;
+}
+```
+## paging technique
+```
+#include <stdio.h>
+
+int main() {
+    int ms, ps, nop, np, rempages, i, j, x, y, pa, offset;
+    int s[10], fno[10][20];
+
+    printf("\nEnter the memory size -- ");
+    scanf("%d", &ms);
+
+    printf("\nEnter the page size -- ");
+    scanf("%d", &ps);
+
+    nop = ms / ps;
+    printf("\nThe no. of pages available in memory are -- %d ", nop);
+
+    printf("\nEnter number of processes -- ");
+    scanf("%d", &np);
+
+    rempages = nop;
+
+    for (i = 1; i <= np; i++) {
+        printf("\nEnter no. of pages required for p[%d]-- ", i);
+        scanf("%d", &s[i]);
+
+        if (s[i] > rempages) {
+            printf("\nMemory is Full");
+            break;
+        }
+
+        rempages -= s[i];
+
+        printf("\nEnter pagetable for p[%d] --- ", i);
+        for (j = 0; j < s[i]; j++)
+            scanf("%d", &fno[i][j]);
+    }
+
+    printf("\nEnter Logical Address to find Physical Address ");
+    printf("\nEnter process no. and page number and offset -- ");
+    scanf("%d %d %d", &x, &y, &offset);
+
+    if (x > np || y >= s[i] || offset >= ps)
+        printf("\nInvalid Process or Page Number or offset");
+    else {
+        pa = fno[x][y] * ps + offset;
+        printf("\nThe Physical Address is -- %d", pa);
+    }
+
+    return 0;
+}
+```
+## opr
+```
+#include <stdio.h>
+
+int main() {
+    int n, m;
+
+    printf("Enter the number of pages: ");
+    scanf("%d", &n);
+
+    int pages[n];
+
+    printf("Enter the page reference sequence:\n");
+    for (int i = 0; i < n; i++)
+        scanf("%d", &pages[i]);
+
+    printf("Enter the number of page frames: ");
+    scanf("%d", &m);
+
+    int pageFrames[m];
+    int pageFaults = 0;
+
+    for (int i = 0; i < m; i++)
+        pageFrames[i] = -1;
+
+    for (int i = 0; i < n; i++) {
+        int page = pages[i];
+
+        int found = 0;
+        for (int j = 0; j < m; j++) {
+            if (pageFrames[j] == page) {
+                found = 1;
+                break;
+            }
+        }
+
+        if (!found) {
+            int replaceIndex = -1;
+            int farthest = i;
+            
+            for (int j = 0; j < m; j++) {
+                int k;
+                for (k = i; k < n; k++) {
+                    if (pageFrames[j] == pages[k]) {
+                        if (k > farthest) {
+                            farthest = k;
+                            replaceIndex = j;
+                        }
+                        break;
+                    }
+                }
+                if (k == n) {
+                    replaceIndex = j;
+                    break;
+                }
+            }
+
+            pageFrames[replaceIndex] = page;
+            pageFaults++;
+        }
+
+        printf("Page %d: ", page);
+        for (int j = 0; j < m; j++) {
+            if (pageFrames[j] != -1)
+                printf("%d ", pageFrames[j]);
+            else
+                printf("X ");
+        }
+        printf("\n");
+    }
+
+    printf("Total Page Faults: %d\n", pageFaults);
+
+    return 0;
+}
+```
+## scan
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+int abs_diff(int a, int b) {
+    return (a > b) ? (a - b) : (b - a);
+}
+
+int main() {
+    int n, h, s;
+
+    printf("Enter the number of requests: ");
+    scanf("%d", &n);
+
+    int req[n];
+
+    printf("Enter the requests sequence:\n");
+    for (int i = 0; i < n; i++)
+        scanf("%d", &req[i]);
+
+    printf("Enter the initial head position: ");
+    scanf("%d", &h);
+
+    printf("Enter the total disk size: ");
+    scanf("%d", &s);
+
+    int dir;
+
+    printf("Enter the head movement direction (1 for high, 0 for low): ");
+    scanf("%d", &dir);
+
+    // Sort the requests
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (req[j] > req[j + 1]) {
+                int t = req[j];
+                req[j] = req[j + 1];
+                req[j + 1] = t;
+            }
+        }
+    }
+
+    int thm = 0;
+    int ci = 0;
+
+    // Find the index where the head is initially located
+    while (ci < n && h >= req[ci]) {
+        ci++;
+    }
+
+    if (dir == 1) {  // Move towards high cylinders
+        for (int i = ci; i < n; i++) {
+            thm += abs_diff(req[i], h);
+            h = req[i];
+        }
+        thm += abs_diff(s, req[n - 1]) + s - 1;
+    } else {  // Move towards low cylinders
+        for (int i = ci - 1; i >= 0; i--) {
+            thm += abs_diff(req[i], h);
+            h = req[i];
+        }
+        thm += abs_diff(req[0], 0);
+    }
+
+    printf("Total head movement is %d\n", thm);
+
+    return 0;
+}
+```
+## look
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int R[100], i, j, n, THM = 0, init, size, move;
+    
+    printf("Enter the number of Requests\n");
+    scanf("%d", &n);
+    
+    printf("Enter the Requests sequence\n");
+    for (i = 0; i < n; i++)
+        scanf("%d", &R[i]);
+    
+    printf("Enter initial head position\n");
+    scanf("%d", &init);
+    
+    printf("Enter total disk size\n");
+    scanf("%d", &size);
+    
+    printf("Enter the head movement direction for high (1) and for low (0)\n");
+    scanf("%d", &move);
+    
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            if (R[j] > R[j + 1]) {
+                int temp = R[j];
+                R[j] = R[j + 1];
+                R[j + 1] = temp;
+            }
+        }
+    }
+    
+    int index;
+    for (i = 0; i < n; i++) {
+        if (init < R[i]) {
+            index = i;
+            break;
+        }
+    }
+    
+    if (move == 1) {
+        for (i = index; i < n; i++) {
+            THM = THM + abs(R[i] - init);
+            init = R[i];
+        }
+        for (i = index - 1; i >= 0; i--) {
+            THM = THM + abs(R[i] - init);
+            init = R[i];
+        }
+    } else {
+        for (i = index - 1; i >= 0; i--) {
+            THM = THM + abs(R[i] - init);
+            init = R[i];
+        }
+        for (i = index; i < n; i++) {
+            THM = THM + abs(R[i] - init);
+            init = R[i];
+        }
+    }
+    
+    printf("Total head movement is %d", THM);
+    
+    return 0;
+}
+```
+
